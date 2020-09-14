@@ -87,6 +87,20 @@ class Cinema:
         position_container = self.seating_graph[position]
         return [position for position in position_container]
 
+    def get_placement_possibilities(self):
+        """Generates a list with tuples containing the coordinates of still eligible seats
+
+        Returns:
+            list(tuple): tuple(row, column)
+        """
+        # scan through grid for eligible seats
+        eligible_coordinates = []
+        for row in self.seating_grid:
+            for seat in row:
+                if seat.eligible:
+                    eligible_coordinates.append(seat.get_coordinates())
+        return eligible_coordinates
+
     def place_group(self, coordinates, size, group_id=None):
         """Occupies the places in the seating grid
 
