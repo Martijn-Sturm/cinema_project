@@ -17,12 +17,25 @@ class Input:
         The groups to be placed in the cinema. The index of each item represents the group size. The item value is the count of that group size
     """
 
-    def __init__(self, file_path) -> None:
+    GRID_BEGIN_LINE_INDEX = 2
+
+    def __init__(self, file_path, type) -> None:
+
         self.file_content = self._read_input_file(file_path)
         self.row_nr = self._get_row_nr_from_file_content(self.file_content)
         self.column_nr = self._get_column_nr_from_file_content(self.file_content)
         self.grid = self._get_grid_from_file_content(self.file_content, self.row_nr)
-        self.groups = self._get_groups_from_file_content(self.file_content)
+
+        if type == "offline":
+            self.groups = self._get_offline_groups_from_file_content(self.file_content)
+        elif type == "online":
+            self.groups = self._get_online_groups_from_file_content(
+                self.file_content, self.row_nr
+            )
+        else:
+            raise ValueError(
+                "type argument should either be 'offline' or 'online' string, depending on the problem at hand."
+            )
 
     def _read_input_file(self, file_path):
         with open(file_path, mode="r") as file:
@@ -36,14 +49,22 @@ class Input:
 
     def _get_grid_from_file_content(self, file_content, row_nr):
         grid = []
-        begin_index = 2
-        end_index = begin_index + row_nr
-        for file_content_index in range(begin_index, end_index):
+        end_index = Input.GRID_BEGIN_LINE_INDEX + row_nr
+        for file_content_index in range(Input.GRID_BEGIN_LINE_INDEX, end_index):
             row = file_content[file_content_index]
             grid.append([int(position) for position in row])
         return grid
 
-    def _get_groups_from_file_content(self, file_content):
+    def _get_offline_groups_from_file_content(self, file_content):
         # last list in file_content
         return [int(group) for group in file_content[-1].split(" ")]
 
+    def _get_online_groups_from_file_content(self, file_content, row_nr):
+        groups = []
+        for group_index in range(
+            # First line after grid to the last line
+            Input.GRID_BEGIN_LINE_INDEX + row_nr,
+            len(file_content),
+        ):
+            groups.append(file_content[group_index])
+        return groups

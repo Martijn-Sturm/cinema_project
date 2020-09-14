@@ -1,4 +1,7 @@
-class Groups:
+from collections import deque
+
+
+class OfflineGroups:
     def __init__(self, groups_list):
         self.freq_dict = self._init_groups_freq_dict(groups_list)
 
@@ -40,3 +43,10 @@ class Groups:
         """
         return max(self.freq_dict.keys())
 
+
+class OnlineGroups:
+    def __init__(self, groups_list: list) -> None:
+        self._groups_deque = deque(groups_list)
+
+    def get_next_group(self):
+        return self._groups_deque.popleft()

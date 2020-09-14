@@ -1,6 +1,6 @@
-from problem.problem import Problem
+from problem.problem import Offline
 
-problem = Problem("input/test_input.txt")
+problem = Offline("input/test_input.txt")
 print(problem.cinema)
 
 problem.cinema.place_group((1, 0), 2, "group_id_test")
