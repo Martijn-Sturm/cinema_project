@@ -3,6 +3,7 @@ from .utils import get_neighboors_from_grid, create_cinema_graph
 from .positions import Seat, Spacer
 from itertools import groupby
 from operator import itemgetter
+from collections import namedtuple
 
 
 class Cinema:
@@ -132,7 +133,7 @@ class Cinema:
             ]
             # For each of this placement possibility, return a dict item with as key the number of seats in that possibility, and as value the most lefter seat belonging to that possibility
             for serie in series_list:
-                result.append({len(serie): (row_number, serie[0])})
+                result.append(PlacementPossibility(len(serie), (row_number, serie[0])))
 
         return result
 
@@ -208,8 +209,5 @@ class Cinema:
                     raise
 
 
-class Placement:
-    def __init__(self, row_nr, column_nr, size) -> None:
-        self.row_nr = row_nr
-        self.column_nr = column_nr
-        self.size = size
+PlacementPossibility = namedtuple("PlacementPossibility", ["size", "coordinates"])
+
