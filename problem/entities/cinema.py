@@ -96,9 +96,15 @@ class Cinema:
         # scan through grid for eligible seats
         eligible_coordinates = []
         for row in self.seating_grid:
-            for seat in row:
-                if seat.eligible:
-                    eligible_coordinates.append(seat.get_coordinates())
+            for position in row:
+                try:
+                    if position.eligible:
+                        eligible_coordinates.append(position.get_coordinates())
+                except AttributeError:
+                    if isinstance(position, Spacer):
+                        pass
+                    else:
+                        raise
         return eligible_coordinates
 
     def place_group(self, coordinates, size, group_id=None):
