@@ -1,6 +1,8 @@
 from tabulate import tabulate
 from .utils import get_neighboors_from_grid, create_cinema_graph
 from .positions import Seat, Spacer
+from itertools import groupby
+from operator import itemgetter
 
 
 class Cinema:
@@ -87,7 +89,7 @@ class Cinema:
         position_container = self.seating_graph[position]
         return [position for position in position_container]
 
-    def get_placement_possibilities(self):
+    def get_placement_position_coordinates(self):
         """Generates a list with tuples containing the coordinates of still eligible seats
 
         Returns:
@@ -106,6 +108,33 @@ class Cinema:
                     else:
                         raise
         return eligible_coordinates
+
+    def get_placement_possibilities(self):
+        """Returns a list with dictionaries in which as keys the max group size that can be placed for that item, and as value the position coordinates of the lefter seat of that item.
+
+        Returns:
+            list(dict): dict(number_of_uninterrupted_seats: position_most_lefter_seat(row, column))
+        """
+        coord_list = self.get_placement_position_coordinates()
+
+        result = []
+        for row in groupby(coord_list, lambda x: x[0]):  # Group by row
+            coords = list(row[1])
+            row_number = coords[0][0]
+            col_numbers_sorted = sorted([coord[1] for coord in coords])
+
+            # Creates a seperate list of each uninterrupted seats next to each other that are available -> single placement possibility
+            series_list = [
+                list(map(itemgetter(1), g))
+                for k, g in groupby(
+                    enumerate(col_numbers_sorted), lambda x: x[0] - x[1]
+                )
+            ]
+            # For each of this placement possibility, return a dict item with as key the number of seats in that possibility, and as value the most lefter seat belonging to that possibility
+            for serie in series_list:
+                result.append({len(serie): (row_number, serie[0])})
+
+        return result
 
     def place_group(self, coordinates, size, group_id=None):
         """Occupies the places in the seating grid
