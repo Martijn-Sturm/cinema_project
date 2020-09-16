@@ -90,6 +90,23 @@ class Cinema:
         position_container = self.seating_graph[position]
         return [position for position in position_container]
 
+    def get_eligible_neighboors_from_position(self, position):
+        all_neighboors = self.get_neighboors_from_position(position)
+
+        eligible_positions = []
+        for position in all_neighboors:
+            try:
+                is_position_eligible = position.eligible
+            except AttributeError:
+                if isinstance(position, Spacer):
+                    continue
+                else:
+                    raise
+            if is_position_eligible:
+                eligible_positions.append(position)
+
+        return eligible_positions
+
     def get_placement_position_coordinates(self):
         """Generates a list with tuples containing the coordinates of still eligible seats
 
@@ -148,21 +165,23 @@ class Cinema:
         # Gather position objects
         positions = []
         for n in range(size):
-            positions.append(self.get_position((coordinates[0], coordinates[1] + n)))
+            row = int(coordinates[0])
+            column = int(coordinates[1]) + n
+            positions.append(self.get_position((row, column)))
         self.occupy_seats(positions, group_id)
 
         # Gather all neighboors for position objects
-        neighboors = []
+        eligible_neighboors = []
         for position in positions:
-            neighboors = neighboors + self.get_neighboors_from_position(position)
-
-        # Remove positions that are to be occupied from neighboorslist:
-        for position in positions:
-            if position in neighboors:
-                neighboors.remove(position)
+            eligible_neighboors = (
+                eligible_neighboors
+                + self.get_eligible_neighboors_from_position(position)
+            )
+        # Remove duplicates
+        eligible_neighboors = set(eligible_neighboors)
 
         # Make neighbooring seats unavailble
-        self.make_seats_unavailable(neighboors)
+        self.make_seats_unavailable(eligible_neighboors)
 
     @staticmethod
     def occupy_seats(position_list: list, group_id=None):
@@ -204,7 +223,7 @@ class Cinema:
             # A spacer can be ignored
             except AttributeError:
                 if isinstance(position, Spacer):
-                    pass
+                    continue
                 else:
                     raise
 
