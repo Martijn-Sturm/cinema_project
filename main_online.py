@@ -1,15 +1,7 @@
-from problem.problem import Online
+from algorithms.online import OnlineAlgorithm
 
-problem = Online("input/online_challengingInput.txt")
-print(problem.cinema)
+online = OnlineAlgorithm("input/online_input_big1.txt")
+vacant = online.get_total_seats()
+filled = online.run_naive1("naive_run1")
+print(f"places filled is: {filled}, from total {vacant} places")
 
-# problem.cinema.place_group((1, 0), 2, "group_id_test")
-# print(problem.cinema)
-
-# neighboors_01 = problem.cinema.get_neighboors_from_coordinates((0, 1))
-
-# print("\nNeighboors from (0,1)", neighboors_01)
-
-# print("\nSame with coordinates:")
-# for neighb in neighboors_01:
-#     print(neighb, neighb.get_coordinates())
