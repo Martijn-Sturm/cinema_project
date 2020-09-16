@@ -66,5 +66,5 @@ class Input:
             Input.GRID_BEGIN_LINE_INDEX + row_nr,
             len(file_content),
         ):
-            groups.append(file_content[group_index])
+            groups.append(int(file_content[group_index]))
         return groups
