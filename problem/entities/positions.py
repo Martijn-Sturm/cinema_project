@@ -58,12 +58,12 @@ class Seat(InterfacePosition):
 
     def __str__(self) -> str:
         if self.eligible:
-            return "Free seat"
+            return "F"
         else:
             if self.taken:
-                return "Seat taken"
+                return "T"
             else:
-                return "Unavailable seat"
+                return "U"
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -79,10 +79,10 @@ class Spacer(InterfacePosition):
         self._coordinates = coordinates
 
     def __str__(self) -> str:
-        return "XXXX"
+        return "X"
 
     def __repr__(self) -> str:
-        return "Spacer"
+        return "Spacer((row, column))"
 
     def get_coordinates(self):
         """get coordinates as tuple
