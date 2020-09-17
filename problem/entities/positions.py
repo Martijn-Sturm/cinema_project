@@ -11,6 +11,10 @@ class InterfacePosition(abc.ABC):
     def __str__(self):
         pass
 
+    @abc.abstractmethod
+    def copy(self):
+        pass
+
 
 class Seat(InterfacePosition):
     def __init__(self, coordinates: Tuple) -> None:
@@ -23,6 +27,15 @@ class Seat(InterfacePosition):
         self.eligible = True
         self.taken = False
         self.taken_by = None
+        self.score = 0
+
+    def copy(self):
+        s = Seat(self.get_coordinates())
+        s.eligible = self.eligible
+        s.taken = self.taken
+        s.taken_by = self.taken_by
+        s.score = self.score
+        return s
 
     def occupy_seat(self, group_id=None):
         """Sets seat to be taken
@@ -77,6 +90,12 @@ class Spacer(InterfacePosition):
             coordinates (tuple): (row, column)
         """
         self._coordinates = coordinates
+        self.score = 0
+
+    def copy(self):
+        s = Spacer(self.get_coordinates())
+        s.score = self.score
+        return s
 
     def __str__(self) -> str:
         return "X"
