@@ -1,7 +1,13 @@
-from algorithms.online import OnlineAlgorithm
+from algorithms.online2 import FirstFit, BestFit, WorstFit
 
-online = OnlineAlgorithm("input/online_input_big1.txt")
-vacant = online.get_total_seats()
-filled = online.run_naive1("naive_run1")
-print(f"places filled is: {filled}, from total {vacant} places")
+first_fit = FirstFit("input/online_input_big1.txt")
+first_fit.execute("firstfit1")
+
+
+best_fit = BestFit("input/online_input_big1.txt")
+best_fit.execute("bestfit1")
+
+
+worst_fit = WorstFit("input/online_input_big1.txt")
+worst_fit.execute("worstfit1")
 

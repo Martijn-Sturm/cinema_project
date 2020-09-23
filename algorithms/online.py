@@ -1,59 +1,191 @@
+from abc import abstractmethod
+from networkx import exception
 from problem.problem import Online
 from logger.complete_logger import get_logger
+import abc
 
 
-class OnlineAlgorithm:
+class NoGroupsLeftError(Exception):
+    def __str__(self):
+        return "There are no groups to be placed anymore"
+
+
+class NoPlacementFoundError(Exception):
+    def __init__(self, group_size, message="No placement for this group was found."):
+        self.group_size = group_size
+        self.message = message
+        super().__init__(self.message)
+
+    def __str__(self):
+        return f"{self.group_size} -> {self.message}"
+
+
+class IOnlineAlgorithm(abc.ABC):
+    @abc.abstractmethod
+    def choose_candidate(self):
+        pass
+
+
+class OnlineAlgorithm(abc.ABC):
+    NO_PLACE_INDICATION = "0 0"
+
     def __init__(self, filepath) -> None:
-        self.problem = Online(filepath)
+        self.filepath = filepath
+        self._init_state()
 
-    def get_total_seats(self):
-        return len(self.problem.cinema.get_placement_position_coordinates())
+    def _init_state(self):
+        problem = Online(self.filepath)
+        self.cinema = problem.cinema
+        self.groups = problem.groups
 
-    def run_naive1(self, logging_folder):
+    def reset_state(self):
+        for attr in vars(self).keys():
+            if attr == "filepath":
+                continue
+            self.__delattr__(attr)
+        self._init_state()
+
+    def get_next_group(self):
+        try:
+            group_size = self.groups.get_next_group()
+            self.logger.info(f"Group size to be placed: {group_size}")
+
+        except IndexError as err:
+            self.logger.warning(f"No more groups in deque before 0 is reached")
+            self.logger.debug(err)
+            raise NoGroupsLeftError
+        if group_size == 0:
+            raise NoGroupsLeftError
+        return group_size
+
+    def get_remaining_free_seats(self):
+        n_free_seats = len(self.cinema.get_placement_position_coordinates())
+        return n_free_seats
+
+    def get_placement_possibilities(self):
+        self.logger.info(self.cinema)
+
+        options = self.cinema.get_placement_possibilities()
+        self.logger.info(f"Number of remaining options: {len(options)}")
+        return options
+
+    @abstractmethod
+    def choose_candidate(self):
+        pass
+
+    def place_candidate(self, placement):
+        self.cinema.place_group(
+            placement.coordinates, self.group_size, str(self.counter)
+        )
+        self.logger.info(
+            f"Group of size: {self.group_size} is placed at placement {placement.coordinates} of size {placement.size}"
+        )
+        # Requirement: report where the group is placed:
+        print(
+            self.convert_position_coordinates_to_row_and_col_number(
+                placement.coordinates
+            )
+        )
+
+    @staticmethod
+    def convert_position_coordinates_to_row_and_col_number(position_tuple):
+        return f"{position_tuple[0] + 1} {position_tuple[1] + 1}"
+
+    def log_end_results(self, folder):
+        logger = get_logger(f"{self.__class__.__name__}_results", subfolder=folder)
+        logger.info(
+            f"Execution is stopped after an attempt to place the '{self.counter}' group"
+        )
+        logger.info(f"{self.filled_seats} number of seats were filled")
+        remaining = self.get_remaining_free_seats()
+        logger.info(f"{remaining} number of remaining free seats")
+
+    def execute(self, logging_folder, log_grid=True):
         print("Logs will be saved in:", logging_folder)
-        problem = self.problem
-        counter = 0
-        places_filled = 0
-        running = True
-        while running:
-            counter += 1
-            logger = get_logger(f"group{str(counter)}", subfolder=logging_folder)
+        self.counter = 0
+        self.filled_seats = 0
+        while True:
+            self.counter += 1
+            self.logger = get_logger(
+                f"{self.__class__.__name__}-{str(self.counter)}",
+                subfolder=logging_folder + "/groups",
+            )
+            if log_grid:
+                self.logger.info(self.cinema)
+            try:
+                self.group_size = self.get_next_group()
+            except NoGroupsLeftError as err:
+                print(err)
+                break
 
-            logger.info(problem.cinema)
+            self.get_remaining_free_seats()
 
-            n_free_seats = len(problem.cinema.get_placement_position_coordinates())
-            logger.info(f"Number of free seats: {n_free_seats}")
+            free_seat_options = self.cinema.get_placement_possibilities()
 
-            group_size = problem.groups.get_next_group()
-            logger.info(f"Group size to be placed: {group_size}")
+            try:
+                placement = self.choose_candidate(free_seat_options)
+            except NoPlacementFoundError as err:
+                self.logger.info(err)
+                print(self.NO_PLACE_INDICATION)
+                continue
 
-            options = problem.cinema.get_placement_possibilities()
-            logger.info(f"Number of remaining options: {len(options)}")
+            self.place_candidate(placement)
+            self.filled_seats += self.group_size
 
-            candidates = {}
-            for option in options:
-                if option.size >= group_size:
-                    if option.size not in candidates:
-                        candidates.update({option.size: [option]})
-                    else:
-                        candidates[option.size].append(option)
-            option_sizes = [size for size in candidates.keys()]
-            logger.info(f"Sizes of options are: {option_sizes}")
+        self.log_end_results(logging_folder)
+        print(f"filled seats = {self.filled_seats}")
+        return self.cinema
 
-            if candidates:
-                placement = candidates[min(candidates.keys())][0]
-                problem.cinema.place_group(
-                    placement.coordinates, group_size, str(counter)
-                )
-                logger.info(
-                    f"Group of size: {group_size} is placed at placement {placement.coordinates} of size {placement.size}"
-                )
-                places_filled += group_size
 
+class BestFit(OnlineAlgorithm):
+    def choose_candidate(self, options):
+
+        candidates = select_placement_possibilities_of_minimum_size(
+            options, self.group_size
+        )
+        if not candidates:
+            raise NoPlacementFoundError(self.group_size)
+
+        option_sizes = [size for size in candidates.keys()]
+        self.logger.info(f"Sizes of options are: {option_sizes}")
+
+        return candidates[min(candidates.keys())][0]
+
+
+class FirstFit(OnlineAlgorithm):
+    def choose_candidate(self, options):
+
+        found_placement = False
+        for option in options:
+            if option.size >= self.group_size:
+                return option
+
+        if not found_placement:
+            raise NoPlacementFoundError(self.group_size)
+
+
+class WorstFit(OnlineAlgorithm):
+    def choose_candidate(self, options):
+
+        candidates = select_placement_possibilities_of_minimum_size(
+            options, self.group_size
+        )
+        if not candidates:
+            raise NoPlacementFoundError(self.group_size)
+
+        option_sizes = [size for size in candidates.keys()]
+        self.logger.info(f"Sizes of options are: {option_sizes}")
+
+        return candidates[max(candidates.keys())][0]
+
+
+
+def select_placement_possibilities_of_minimum_size(options, size: int):
+    candidates = {}
+    for option in options:
+        if option.size >= size:
+            if option.size not in candidates:
+                candidates.update({option.size: [option]})
             else:
-                logger.warning(
-                    f"The {counter}th group cannot be placed in cinema. Program exitting"
-                )
-                running = False
-        return places_filled
-
+                candidates[option.size].append(option)
+    return candidates
