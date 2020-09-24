@@ -99,11 +99,8 @@ class Cinema:
         return group_sizes
 
     def find_solution(self, list_of_sizes):
-        # print("begin")
         vistided_states = 0
         queue = self.branch(list_of_sizes, 0, 0)
-        # for i in queue:
-        #    print(i.coord_node, i.size_group)
         best_grid = self.seating_grid
         best_score = 0
         taken_free_seats = {}
@@ -123,22 +120,14 @@ class Cinema:
             new_queue = []
 
             if taken_seats in taken_free_seats:
-                # print(q.coord_node, q.size_group, "second_2")
-                # print(str(self))
                 if free_seats >= taken_free_seats[taken_seats]:
                     taken_free_seats[taken_seats] = free_seats
                     new_queue = self.branch(new_freq_dict, taken_seats, free_seats)
-
-                    # print(q.coord_node, q.size_group, "second_time_lower_equal_3")
             else:
                 taken_free_seats[taken_seats] = free_seats
                 new_queue = self.branch(new_freq_dict, taken_seats, free_seats)
-                # print(q.coord_node, q.size_group, "first_time_1")
-                # print(str(self))
-
                 if best_score < taken_seats:
                     best_score = taken_seats
-                    # print("bs", best_score)
                     best_grid = self.copy_grid()
             queue += new_queue
 
