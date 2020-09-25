@@ -178,7 +178,38 @@ class WorstFit(OnlineAlgorithm):
 
         return candidates[max(candidates.keys())][0]
 
-
+class MinCovidChairs(OnlineAlgorithm):
+    def choose_candidate(self, options):
+        #loop through all options
+        candidates = {}
+        for option in options:
+            size = self.group_size
+            if option.size >= size:
+                coordinates = option[1]
+                positions = []
+                # Convert to positions 
+                for n in range(size):
+                    row = int(coordinates[0])
+                    column = int(coordinates[1]) + n
+                    positions.append(self.cinema.get_position((row, column)))
+                covid_chairs = []
+                # Count number of covid chairs this option would add
+                for position in positions:
+                    covid_chairs = (
+                        covid_chairs 
+                           + self.cinema.get_eligible_neighboors_from_position(position))
+                covid_chairs = set(covid_chairs)  
+                # Also the to be occupied chairs were counted if groups are bigger than 1. 
+                if self.group_size > 1:
+                    number_covid_chairs = len(covid_chairs) - int(self.group_size)
+                else:
+                    number_covid_chairs = len(covid_chairs)
+                # Add candidate to candidates    
+                if number_covid_chairs not in candidates:
+                    candidates.update({ number_covid_chairs : [option]})
+                else:
+                    candidates[number_covid_chairs].append(option)
+        return candidates[min(candidates.keys())][0]
 
 def select_placement_possibilities_of_minimum_size(options, size: int):
     candidates = {}
