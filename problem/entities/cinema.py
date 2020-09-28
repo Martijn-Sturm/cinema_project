@@ -131,7 +131,7 @@ class Cinema:
         """Returns a list with dictionaries in which as keys the max group size that can be placed for that item, and as value the position coordinates of the lefter seat of that item.
 
         Returns:
-            list(dict): dict(number_of_uninterrupted_seats: position_most_lefter_seat(row, column))
+            list(PlacementPossibility): 
         """
         coord_list = self.get_placement_position_coordinates()
 

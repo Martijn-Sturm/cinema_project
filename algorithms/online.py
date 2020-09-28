@@ -1,5 +1,4 @@
 from abc import abstractmethod
-from networkx import exception
 from problem.problem import Online
 from logger.complete_logger import get_logger
 import abc
@@ -20,12 +19,6 @@ class NoPlacementFoundError(Exception):
         return f"{self.group_size} -> {self.message}"
 
 
-class IOnlineAlgorithm(abc.ABC):
-    @abc.abstractmethod
-    def choose_candidate(self):
-        pass
-
-
 class OnlineAlgorithm(abc.ABC):
     NO_PLACE_INDICATION = "0 0"
 
@@ -38,12 +31,20 @@ class OnlineAlgorithm(abc.ABC):
         self.cinema = problem.cinema
         self.groups = problem.groups
 
-    def reset_state(self):
-        for attr in vars(self).keys():
-            if attr == "filepath":
-                continue
-            self.__delattr__(attr)
-        self._init_state()
+    # def reset_state(self):
+    #     """Resets the object's state to the original state when the object was instantiated
+    #     """
+    #     attrs = vars(self).keys()
+    #     for attr in attrs:
+    #         if attr == "filepath":
+    #             continue
+    #         delattr(self, attr)
+    #     self._init_state()
+
+    def set_new_randomized_groups(self, group_list: list):
+        from collections import deque
+
+        self.groups = deque(group_list)
 
     def get_next_group(self):
         try:
@@ -178,16 +179,17 @@ class WorstFit(OnlineAlgorithm):
 
         return candidates[max(candidates.keys())][0]
 
+
 class MinCovidChairs(OnlineAlgorithm):
     def choose_candidate(self, options):
-        #loop through all options
+        # loop through all options
         candidates = {}
         for option in options:
             size = self.group_size
             if option.size >= size:
                 coordinates = option[1]
                 positions = []
-                # Convert to positions 
+                # Convert to positions
                 for n in range(size):
                     row = int(coordinates[0])
                     column = int(coordinates[1]) + n
@@ -196,20 +198,22 @@ class MinCovidChairs(OnlineAlgorithm):
                 # Count number of covid chairs this option would add
                 for position in positions:
                     covid_chairs = (
-                        covid_chairs 
-                           + self.cinema.get_eligible_neighboors_from_position(position))
-                covid_chairs = set(covid_chairs)  
-                # Also the to be occupied chairs were counted if groups are bigger than 1. 
+                        covid_chairs
+                        + self.cinema.get_eligible_neighboors_from_position(position)
+                    )
+                covid_chairs = set(covid_chairs)
+                # Also the to be occupied chairs were counted if groups are bigger than 1.
                 if self.group_size > 1:
                     number_covid_chairs = len(covid_chairs) - int(self.group_size)
                 else:
                     number_covid_chairs = len(covid_chairs)
-                # Add candidate to candidates    
+                # Add candidate to candidates
                 if number_covid_chairs not in candidates:
-                    candidates.update({ number_covid_chairs : [option]})
+                    candidates.update({number_covid_chairs: [option]})
                 else:
                     candidates[number_covid_chairs].append(option)
         return candidates[min(candidates.keys())][0]
+
 
 def select_placement_possibilities_of_minimum_size(options, size: int):
     candidates = {}
