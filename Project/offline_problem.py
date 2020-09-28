@@ -14,7 +14,7 @@ class Problem:
 
     def input_data(self):
         """"Read input."""
-        file = open("offline_mediumLargerInput.txt", "r")  # open file
+        file = open("offline_10x10.txt", "r")  # open file
         self.rows = int(file.readline())    # read number of rows
         self.cols = int(file.readline())    # read number of seats on the rows
 
@@ -260,9 +260,6 @@ for var in model.variables():
         coor = int(var.name[1:])
         xCoor = (coor - 1) % p.cols
         yCoor = math.floor((coor - 1) / p.cols)
-        print(p.grid[yCoor][xCoor])
-        print(var.value())
-        print()
         if(p.grid[yCoor][xCoor] == '0'):
             result[yCoor][xCoor] = 'grey'
         if(var.value() == 1):
