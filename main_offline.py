@@ -1,9 +1,6 @@
 from problem.problem import Offline
 
-problem = Offline("input/test_input.txt")
-print(problem.cinema)
-
-problem.cinema.place_group((1, 0), 2, "group_id_test")
+problem = Offline("/Users/clazinasteunenberg/Documents/GitHub/cinema_project/input/offline_challengingInput.txt")
 print(problem.cinema)
 
 neighboors_01 = problem.cinema.get_neighboors_from_coordinates((0, 1))

@@ -2,6 +2,7 @@
 Zoril Oláh and Martijn Sturm."""
 
 from pulp import LpMaximize, LpProblem, LpStatus, lpSum, LpVariable, GLPK
+from termcolor import colored
 import math
 
 class Problem:
@@ -13,7 +14,7 @@ class Problem:
 
     def input_data(self):
         """"Read input."""
-        file = open("offline_challengingInput.txt", "r")  # open file
+        file = open("/Users/clazinasteunenberg/Documents/GitHub/cinema_project/input/offline_mediumLargeInput.txt", "r")  # open file
         self.rows = int(file.readline())    # read number of rows
         self.cols = int(file.readline())    # read number of seats on the rows
 
@@ -253,15 +254,26 @@ model += lpSum(x)
 status = model.solve()
 # solver=GLPK(msg=False)
 
-result = [[0]*p.cols for _ in range(p.rows)]
+print(f"Test")
+
+result = [['red']*p.cols for _ in range(p.rows)]
 for var in model.variables():
-    if(var.name[0:1] == 'x' and var.value() == 1):
+    if(var.name[0:1] == 'x'):
         coor = int(var.name[1:])
         xCoor = (coor - 1) % p.cols
         yCoor = math.floor((coor - 1) / p.cols)
-        result[yCoor][xCoor] = 1
-    
+        print(p.grid[yCoor][xCoor])
+        print(var.value())
+        print()
+        if(p.grid[yCoor][xCoor] == '0'):
+            result[yCoor][xCoor] = 'grey'
+        if(var.value() == 1):
+            result[yCoor][xCoor] = 'green'
+
 print('\n'.join([''.join(['{:4}'.format(item) for item in row]) 
+    for row in p.grid]))
+
+print('\n'.join([''.join(['{:4}'.format(colored('■ ', item)) for item in row]) 
       for row in result]))
 
 for name, constraint in model.constraints.items():
