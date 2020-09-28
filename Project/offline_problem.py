@@ -14,7 +14,7 @@ class Problem:
 
     def input_data(self):
         """"Read input."""
-        file = open("/Users/clazinasteunenberg/Documents/GitHub/cinema_project/input/offline_mediumLargeInput.txt", "r")  # open file
+        file = open("offline_mediumLargerInput.txt", "r")  # open file
         self.rows = int(file.readline())    # read number of rows
         self.cols = int(file.readline())    # read number of seats on the rows
 

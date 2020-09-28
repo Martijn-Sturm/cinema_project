@@ -1,6 +1,6 @@
 from problem.problem import Offline
 
-problem = Offline("/Users/clazinasteunenberg/Documents/GitHub/cinema_project/input/offline_challengingInput.txt")
+problem = Offline("offline_challengingInput.txt")
 print(problem.cinema)
 
 neighboors_01 = problem.cinema.get_neighboors_from_coordinates((0, 1))
