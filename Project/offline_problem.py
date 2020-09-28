@@ -254,8 +254,6 @@ model += lpSum(x)
 status = model.solve()
 # solver=GLPK(msg=False)
 
-print(f"Test")
-
 result = [['red']*p.cols for _ in range(p.rows)]
 for var in model.variables():
     if(var.name[0:1] == 'x'):
@@ -269,9 +267,6 @@ for var in model.variables():
             result[yCoor][xCoor] = 'grey'
         if(var.value() == 1):
             result[yCoor][xCoor] = 'green'
-
-print('\n'.join([''.join(['{:4}'.format(item) for item in row]) 
-    for row in p.grid]))
 
 print('\n'.join([''.join(['{:4}'.format(colored('■ ', item)) for item in row]) 
       for row in result]))
