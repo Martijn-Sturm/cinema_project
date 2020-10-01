@@ -93,6 +93,7 @@ class Problem:
 
         print('\n'.join([''.join(['{:4}'.format(colored('■ ', item)) for item in row])
                          for row in result]))
+        print('Total: ' + str(self.model.objective.value()))
         for name, constraint in self.model.constraints.items():
             if name[0:5] == 'Group':
                 print(f"{name}: {constraint.value()}")
@@ -159,16 +160,23 @@ class Problem:
             for col in range(self.cols - size_minus):
                 key = row * (self.cols - size_minus) + col + 1
                 xKey = row * self.cols + col + 1
+                lrKey = xKey - row
                 constraint = (size_dict[key] >= 1)
                 if col > 0:
-                    self.model += (size_dict[key] <= 1 - self.x[xKey - 1], f"{size_string}{key}_LeftGroupCheck")
-                    constraint += -(1 - self.x[xKey - 1]) + 1
-                for i in range(size):
+                    self.model += (size_dict[key] <= self.right[lrKey - 1], f"{size_string}{key}_LeftGroupCheck")
+                    constraint += -(self.right[lrKey - 1]) + 1
+                else:
+                    self.model += (size_dict[key] <= self.x[xKey], f"{size_string}{key}_AltLeftGroupCheck")
+                    constraint += -(self.x[xKey]) + 1
+                for i in range(2, size - 1, 2):
                     self.model += (size_dict[key] <= self.x[xKey + i], f"{size_string}{key}_{i + 1}GroupCheck")
                     constraint += -(self.x[xKey + i]) + 1
                 if col + size < self.cols:
-                    self.model += (size_dict[key] <= 1 - self.x[xKey + size], f"{size_string}{key}_RightGroupCheck")
-                    constraint += -(1 - self.x[xKey + size]) + 1
+                    self.model += (size_dict[key] <= self.left[lrKey + size - 1], f"{size_string}{key}_RightGroupCheck")
+                    constraint += -(self.left[lrKey + size - 1]) + 1
+                else:
+                    self.model += (size_dict[key] <= self.x[xKey + size - 1], f"{size_string}{key}_AltRightGroupCheck")
+                    constraint += -(self.x[xKey + size - 1]) + 1
                 self.model += (constraint, f"{size_string}{key}_TotalGroupCheck")
 
 # SUCCESS!!
