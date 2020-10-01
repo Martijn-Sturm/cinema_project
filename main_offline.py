@@ -1,4 +1,4 @@
 from problem.problem import Offline
 
 
-Offline("input\\test_input.txt")
+Offline("/Users/clazinasteunenberg/Documents/GitHub/cinema_project/input/offline_mediumLargerInput.txt")

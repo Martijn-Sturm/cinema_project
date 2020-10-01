@@ -86,7 +86,7 @@ class Problem:
                 coor = int(var.name[1:])
                 xCoor = (coor - 1) % self.cols
                 yCoor = math.floor((coor - 1) / self.cols)
-                if self.grid[yCoor][xCoor] == '0':
+                if self.grid[yCoor][xCoor] == 0:
                     result[yCoor][xCoor] = 'grey'
                 if var.value() == 1:
                     result[yCoor][xCoor] = 'green'
