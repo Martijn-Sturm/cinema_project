@@ -2,7 +2,7 @@ from abc import abstractmethod
 from problem.problem import Online
 from logger.complete_logger import get_logger
 import abc
-
+import random
 
 class NoGroupsLeftError(Exception):
     def __str__(self):
@@ -144,6 +144,7 @@ class BestFit(OnlineAlgorithm):
         candidates = select_placement_possibilities_of_minimum_size(
             options, self.group_size
         )
+
         if not candidates:
             raise NoPlacementFoundError(self.group_size)
 
@@ -179,41 +180,84 @@ class WorstFit(OnlineAlgorithm):
 
         return candidates[max(candidates.keys())][0]
 
+class Hybrid_BF_CC(OnlineAlgorithm):
+    def choose_candidate(self, options):
+        candidates = {}
+        placement_possibilities = select_placement_possibilities_of_minimum_size(
+            options, self.group_size)
+        placements_sizes = sorted(placement_possibilities)
+
+        for placement_size in placements_sizes:
+            #Take all possabilities for a specific size
+            specific_size_placement_possibilities = placement_possibilities[placement_size]
+            #Use function to find least covid chair placement for the specific size. Output is dict {size : possibilities}
+            specific_size_least_covid_chairs = select_placement_possibilities_of_minimum_covid_chairs(
+            self, specific_size_placement_possibilities)
+            #Select the least amount of covid chair options. 
+            #Random to deal with multiple options with the same amount of covid chairs. 
+            candidate = random.choice(list(
+                specific_size_least_covid_chairs[min(
+                    specific_size_least_covid_chairs.keys())]))
+            if placement_size not in candidates:
+                candidates.update({placement_size: [candidate]})
+            else:
+                candidates[placement_size].append(candidate)
+
+        if not candidates:
+            raise NoPlacementFoundError((self.group_size))    
+        return candidates[min(candidates.keys())][0]
+
+        
 
 class MinCovidChairs(OnlineAlgorithm):
     def choose_candidate(self, options):
-        # loop through all options
         candidates = {}
-        for option in options:
-            size = self.group_size
-            if option.size >= size:
-                coordinates = option[1]
-                positions = []
-                # Convert to positions
-                for n in range(size):
-                    row = int(coordinates[0])
-                    column = int(coordinates[1]) + n
-                    positions.append(self.cinema.get_position((row, column)))
-                covid_chairs = []
-                # Count number of covid chairs this option would add
-                for position in positions:
+        placement_possibilities = select_placement_possibilities_of_minimum_size(
+            options, self.group_size)
+        
+        placements_sizes = sorted(placement_possibilities)
+        
+        for placement_size in placements_sizes:
+            #Take all possabilities for a specific size
+            specific_size_placement_possibilities = placement_possibilities[placement_size]
+            #Use function to find least covid chair placement for the specific size. Output is dict {covid_chairs : possibilities}
+            specific_size_least_covid_chairs = select_placement_possibilities_of_minimum_covid_chairs(
+            self, specific_size_placement_possibilities)
+            #Add the placement option(s) for this specific size to the dictionary
+            candidates.update(specific_size_least_covid_chairs)
+            
+        if not candidates:
+            raise NoPlacementFoundError((self.group_size))    
+            
+        return candidates[min(candidates.keys())][0]
+
+def select_placement_possibilities_of_minimum_covid_chairs(self, options):
+    candidates = {}
+    size = self.group_size
+    for option in options:
+        coordinates = option[1]
+        positions = []
+        for n in range(size):
+            row = int(coordinates[0])
+            column = int(coordinates[1]) + n
+            positions.append(self.cinema.get_position((row, column)))
+        covid_chairs = []
+        for position in positions:
                     covid_chairs = (
                         covid_chairs
                         + self.cinema.get_eligible_neighboors_from_position(position)
                     )
-                covid_chairs = set(covid_chairs)
-                # Also the to be occupied chairs were counted if groups are bigger than 1.
-                if self.group_size > 1:
-                    number_covid_chairs = len(covid_chairs) - int(self.group_size)
-                else:
-                    number_covid_chairs = len(covid_chairs)
-                # Add candidate to candidates
-                if number_covid_chairs not in candidates:
-                    candidates.update({number_covid_chairs: [option]})
-                else:
-                    candidates[number_covid_chairs].append(option)
-        return candidates[min(candidates.keys())][0]
-
+        covid_chairs = set(covid_chairs)
+        if self.group_size > 1:
+            number_covid_chairs = len(covid_chairs) - int(self.group_size)
+        else:
+            number_covid_chairs = len(covid_chairs)
+        candidates
+        if number_covid_chairs not in candidates:
+            candidates.update({number_covid_chairs: [option]})
+        else:
+            candidates[number_covid_chairs].append(option)           
+    return candidates
 
 def select_placement_possibilities_of_minimum_size(options, size: int):
     candidates = {}
