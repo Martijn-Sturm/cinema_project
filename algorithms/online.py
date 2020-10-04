@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from problem.problem import Online
-from logger.complete_logger import get_logger
+from problem.entities.groups import OnlineGroups
+from logger.complete_logger import get_logger, dummy_logger
 import abc
 import random
 
@@ -41,10 +42,10 @@ class OnlineAlgorithm(abc.ABC):
     #         delattr(self, attr)
     #     self._init_state()
 
-    def set_new_randomized_groups(self, group_list: list):
+    def set_new_groups(self, group_list: list):
         from collections import deque
 
-        self.groups = deque(group_list)
+        self.groups = OnlineGroups(group_list)
 
     def get_next_group(self):
         try:
@@ -101,16 +102,20 @@ class OnlineAlgorithm(abc.ABC):
         remaining = self.get_remaining_free_seats()
         logger.info(f"{remaining} number of remaining free seats")
 
-    def execute(self, logging_folder, log_grid=True):
-        print("Logs will be saved in:", logging_folder)
+    def execute(self, logging_folder=None, log_grid=True):
+        if logging_folder:
+            print("Logs will be saved in:", logging_folder)
         self.counter = 0
         self.filled_seats = 0
         while True:
             self.counter += 1
-            self.logger = get_logger(
-                f"{self.__class__.__name__}-{str(self.counter)}",
-                subfolder=logging_folder + "/groups",
-            )
+            if logging_folder:
+                self.logger = get_logger(
+                    f"{self.__class__.__name__}-{str(self.counter)}",
+                    subfolder=logging_folder + "/groups",
+                )
+            else:
+                self.logger = dummy_logger()
             if log_grid:
                 self.logger.info(self.cinema)
             try:
