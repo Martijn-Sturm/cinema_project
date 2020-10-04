@@ -127,6 +127,20 @@ class Cinema:
                         raise
         return eligible_coordinates
 
+    def get_occupied_seats(self):
+        occupied_seats = []
+        for row in self.seating_grid:
+            for position in row:
+                try:
+                    if position.taken:
+                        occupied_seats.append(position)
+                except AttributeError:
+                    if isinstance(position, Spacer):
+                        pass
+                    else:
+                        raise
+        return occupied_seats
+
     def get_placement_possibilities(self):
         """Returns a list with dictionaries in which as keys the max group size that can be placed for that item, and as value the position coordinates of the lefter seat of that item.
 
