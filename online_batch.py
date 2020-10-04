@@ -1,5 +1,5 @@
 from utils.test_file import generate_group_sequence
-from algorithms.online import FirstFit, BestFit, WorstFit, MinCovidChairs
+from algorithms.online import FirstFit, BestFit, WorstFit, MinCovidChairs, Hybrid_BF_CC
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -28,13 +28,14 @@ worst_fit_result = repeat_algorithm_with_different_groups(
 min_covid_chairs_result = repeat_algorithm_with_different_groups(
     MinCovidChairs, FILEPATH, groups_list
 )
-
+hybrid = repeat_algorithm_with_different_groups(Hybrid_BF_CC, FILEPATH, groups_list)
 df = pd.DataFrame(
     {
         "first": first_fit_result,
         "best": best_fit_result,
         "worst": worst_fit_result,
         "minCovid": min_covid_chairs_result,
+        "hybrid": hybrid,
     }
 )
 

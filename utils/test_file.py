@@ -20,5 +20,5 @@ def write_test_file(filename, contents):
         file.writelines([str(group) + "\n" for group in contents])
 
 
-write_test_file("new_test1", generate_group_sequence(100))
+# write_test_file("new_test1", generate_group_sequence(100))
 
