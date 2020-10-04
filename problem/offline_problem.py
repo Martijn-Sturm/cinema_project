@@ -12,7 +12,6 @@ class Problem:
         self.number_of_groups = ng
         self.rows = r
         self.cols = c
-
         # Create the model
         self.model = LpProblem(name="Cinema_Seating_Problem", sense=LpMaximize)
         # Initialize the decision variables
@@ -56,29 +55,28 @@ class Problem:
         # Solve the problem
         self.model.solve()
         # solver=GLPK(msg=False)
+        self.update_grid()
+        self.update_group_sizes()
+        return self.grid
 
-        self.output()
+    def update_group_sizes(self):
+        size = 0
+        for name, constraint in self.model.constraints.items():
+            if name[0:5] == 'Group' and name[-5:] != "Large":
+                self.number_of_groups[size] = int(abs(constraint.value()))
+                size += 1
+
+    def get_taken_seats(self):
+        return int(self.model.objective.value())
 
     def output(self):
         """
-        for var in self.model.variables():
-            if var.name[0:1] == 'x':
-                coor = int(var.name[1:])
-                xCoor = (coor - 1) % self.cols
-                yCoor = math.floor((coor - 1) / self.cols)
-                if self.grid[yCoor][xCoor] == 0:
-                    self.grid[yCoor][xCoor] = "0"
-                    continue
-                if var.value() == 1:
-                    self.grid[yCoor][xCoor] = "x"
-                else:
-                    self.grid[yCoor][xCoor] = "1"
-
         for r in range(self.rows):
             row = ""
             for c in range(self.cols):
                 row += self.grid[r][c]
             print(row)
+        """
         """
         result = [['red'] * self.cols for _ in range(self.rows)]
         for var in self.model.variables():
@@ -93,11 +91,26 @@ class Problem:
 
         print('\n'.join([''.join(['{:4}'.format(colored('■ ', item)) for item in row])
                          for row in result]))
-        print('Total: ' + str(self.model.objective.value()))
+        """
+        # print('Total: ' + str(self.model.objective.value()))
+
         for name, constraint in self.model.constraints.items():
             if name[0:5] == 'Group':
                 print(f"{name}: {constraint.value()}")
 
+    def update_grid(self):
+        for var in self.model.variables():
+            if var.name[0:1] == 'x':
+                coor = int(var.name[1:])
+                xCoor = (coor - 1) % self.cols
+                yCoor = math.floor((coor - 1) / self.cols)
+                if self.grid[yCoor][xCoor] == 0:
+                    self.grid[yCoor][xCoor] = "0"
+                    continue
+                if var.value() == 1:
+                    self.grid[yCoor][xCoor] = "x"
+                else:
+                    self.grid[yCoor][xCoor] = "1"
 
     def determine_biggest_sum(self, strings, dicts):
         for i in range(len(strings)):
