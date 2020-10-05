@@ -1,3 +1,4 @@
 from problem.problem import Offline
 
-Offline("offline_mediumLargestInput.txt")
+for i in range(21):
+    Offline("Exact" + str(i + 1) + ".txt")
