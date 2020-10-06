@@ -9,8 +9,13 @@ class Offline:
         file_input = Input(filepath, "offline")
 
         # From file input, initialize cinema and groups object
-        self.cinema = Cinema(file_input.grid, file_input.row_nr, file_input.column_nr)
-        self.groups = OfflineGroups(file_input.groups)
+        try:
+            self.cinema = Cinema(
+                file_input.grid, file_input.row_nr, file_input.column_nr
+            )
+            self.groups = OfflineGroups(file_input.groups)
+        except Exception as err:
+            raise type(err)(str(err), "filepath:", str(filepath))
 
 
 class Online:
@@ -19,5 +24,11 @@ class Online:
         file_input = Input(filepath, "online")
 
         # From file input, initialize cinema and groups object
-        self.cinema = Cinema(file_input.grid, file_input.row_nr, file_input.column_nr)
-        self.groups = OnlineGroups(file_input.groups)
+        try:
+            self.cinema = Cinema(
+                file_input.grid, file_input.row_nr, file_input.column_nr
+            )
+            self.groups = OnlineGroups(file_input.groups)
+        except Exception as err:
+            raise type(err)(str(err), "filepath:", str(filepath))
+
