@@ -1,6 +1,6 @@
 from problem.problem import Offline, Onfline
 import pickle
-f = open("/Users/clazinasteunenberg/Documents/GitHub/cinema_project/output/onfline.txt", "wb")
+f = open("output/onfline.txt", "wb")
 dict = {}
 for i in range(7):
     name = "Online" + str(i + 1)
