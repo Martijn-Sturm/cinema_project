@@ -12,6 +12,16 @@ class Offline:
         # p.print_grid()
         p.get_solution()
 
+class Onfline:
+    def __init__(self, filepath) -> None:
+        # Read file
+        file_input = Input(filepath, "onfline")
+        p = Problem(file_input.grid, file_input.groups, file_input.row_nr, file_input.column_nr, file_input.vips)
+        # p.print_grid()
+        p.get_solution()
+        self.result = p.model.objective.value()
+    def __result__():
+        return self.result
 
 class Online:
     def __init__(self, filepath) -> None:

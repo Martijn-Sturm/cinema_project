@@ -29,6 +29,11 @@ class Input:
         if type == "offline":
             self.groups = self._get_offline_groups_from_file_content(self.file_content)
             self.vips = self._get_offline_vips_from_file_content(self.file_content)
+        elif type == "onfline":
+            self.groups = self._get_onfline_groups_from_file_content(
+                self.file_content, self.row_nr
+            )
+            self.vips = [0] * 8
         elif type == "online":
             self.groups = self._get_online_groups_from_file_content(
                 self.file_content, self.row_nr
@@ -75,4 +80,17 @@ class Input:
             len(file_content),
         ):
             groups.append(int(file_content[group_index]))
+        return groups
+
+
+    def _get_onfline_groups_from_file_content(self, file_content, row_nr):
+        groups = [0] * 8
+        for group_index in range(
+            # First line after grid to the last line
+            Input.GRID_BEGIN_LINE_INDEX + row_nr,
+            len(file_content),
+        ):
+            groupSize = int(file_content[group_index])
+            if(groupSize > 0):
+                groups[int(groupSize - 1)] += 1
         return groups
