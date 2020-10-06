@@ -29,7 +29,6 @@ class Input:
         if type == "offline":
             self.groups = self._get_offline_groups_from_file_content(self.file_content)
             self.vips = self._get_offline_vips_from_file_content(self.file_content)
-            print(self.vips[1])
         elif type == "online":
             self.groups = self._get_online_groups_from_file_content(
                 self.file_content, self.row_nr
