@@ -28,6 +28,8 @@ class Input:
 
         if type == "offline":
             self.groups = self._get_offline_groups_from_file_content(self.file_content)
+            self.vips = self._get_offline_vips_from_file_content(self.file_content)
+            print(self.vips[1])
         elif type == "online":
             self.groups = self._get_online_groups_from_file_content(
                 self.file_content, self.row_nr
@@ -57,7 +59,14 @@ class Input:
 
     def _get_offline_groups_from_file_content(self, file_content):
         # last list in file_content
-        return [int(group) for group in file_content[-1].split(" ")]
+        return [int(group) for group in file_content[2 + int(file_content[0])].split(" ")]
+
+    def _get_offline_vips_from_file_content(self, file_content):
+        # last list in file_content
+        if(file_content[-1] != file_content[2 + int(file_content[0])]):
+            return [int(group) for group in file_content[-1].split(" ")]
+        else:
+            return [0] * 8
 
     def _get_online_groups_from_file_content(self, file_content, row_nr):
         groups = []

@@ -7,11 +7,12 @@ import math
 
 
 class Problem:
-    def __init__(self, g, ng, r, c):
+    def __init__(self, g, ng, r, c, v):
         self.grid = g
         self.number_of_groups = ng
         self.rows = r
         self.cols = c
+        self.vips = v
 
         # Create the model
         self.model = LpProblem(name="Cinema_Seating_Problem", sense=LpMaximize)
@@ -102,6 +103,8 @@ class Problem:
     def determine_biggest_sum(self, strings, dicts):
         for i in range(len(strings)):
             self.model += (lpSum(dicts[i]) <= self.number_of_groups[i], f"GroupCheck_{strings[i]}")
+            if(self.vips[i] != 0):
+                self.model += (lpSum(dicts[i]) >= self.vips[i], f"VIPCheck_{strings[i]}")
         self.model += (lpSum(self.nine) <= 0, "GroupCheck_Large")
 
     def update_all_models(self, strings, dicts):
