@@ -57,10 +57,7 @@ class Cinema:
     def __str__(self) -> str:
         print_grid = tabulate(self.seating_grid)
         return (
-            # f"\nCinema with properties:\n\n"
-            # f"Number of rows: {self.row_nr}\n"
-            # f"Number of columns: {self.column_nr}\n"
-            f"Seating grid: \n{print_grid}"
+            f"{print_grid}"
         )
 
     def get_position(self, coordinates):
@@ -99,46 +96,55 @@ class Cinema:
         return group_sizes
 
     def find_solution(self, list_of_sizes):
-        vistided_states = 0
-        queue = self.branch(list_of_sizes, 0, 0)
+        pp = self.get_possible_places_for_all_groups(list_of_sizes)
+        upper_bound = self.get_upper_bound(pp, list_of_sizes, 0)  # estimated of the total number of seats that can be filled
+        queue = self.branch(list_of_sizes, 0, 0, pp)
+        lower_bound = 0
         best_grid = self.seating_grid
-        best_score = 0
-        taken_free_seats = {}
 
         while len(queue) != 0:
             q = queue.pop(0)
-            vistided_states += 1
             new_graph = create_cinema_graph(q.grid)
             self.seating_graph = new_graph
             self.seating_grid = q.grid
 
             self.place_group(q.coord_node, q.size_group)
             new_freq_dict = self.update_group_size_list(q.size_group, q.list_of_groups)
-
             taken_seats = q.nr_taken + q.size_group
             free_seats = self.get_number_of_eligible_seats()
+            pp_node = self.get_possible_places_for_all_groups(new_freq_dict)
+            upper_bound_node = self.get_upper_bound(pp_node, new_freq_dict, taken_seats)
             new_queue = []
 
-            if taken_seats in taken_free_seats:
-                if free_seats >= taken_free_seats[taken_seats]:
-                    taken_free_seats[taken_seats] = free_seats
-                    new_queue = self.branch(new_freq_dict, taken_seats, free_seats)
-            else:
-                taken_free_seats[taken_seats] = free_seats
-                new_queue = self.branch(new_freq_dict, taken_seats, free_seats)
-                if best_score < taken_seats:
-                    best_score = taken_seats
-                    best_grid = self.copy_grid()
+            if lower_bound < taken_seats:  # when more seats can be filled than current max
+                lower_bound = taken_seats
+                best_grid = self.copy_grid()
+                if lower_bound == upper_bound:  # when the upper bound is reached
+                    break
+                new_queue = self.branch(new_freq_dict, taken_seats, free_seats, pp_node)
+            elif lower_bound <= upper_bound_node:  # less seats or equal seats but the possible number that can be found is larger than lower bound
+                new_queue = self.branch(new_freq_dict, taken_seats, free_seats, pp_node)
             queue += new_queue
 
         self.seating_grid = best_grid
-        print("Result")
-        print("Visited states:", vistided_states)
-        print(str(self))
+        output = []
+        for i in self.seating_grid:
+            row = ""
+            for j in i:
+                if str(j) == "T":
+                    row += "x"
+                if str(j) == "X":
+                    row += "0"
+                if str(j) == "U":
+                    row += "1"
+                if str(j) == "F":
+                    row += "1"
+            output.append(row)
+        for row in output:
+            print(row)
 
-    def branch(self, list_of_sizes, taken, nr_eligible):
-        """Get nodes to expand on"""
-        possible_places = self.get_possible_places_for_all_groups(list_of_sizes)
+    def branch(self, list_of_sizes, taken, nr_eligible, possible_places):
+        """Get nodes to expand on."""
         node_list = []
 
         for k, v in possible_places.items():
@@ -150,24 +156,31 @@ class Cinema:
                     node_list.append(Node(coord, k, self.copy_grid(), list_of_sizes, taken, nr_eligible))
         return node_list
 
+    def get_upper_bound(self, posibilities, groups, total):
+        for g, v in posibilities.items():
+            if len(v) >= groups[g]:
+                total += g * groups[g]
+        return total
+
     def bound_redundency(self, coord, values, size):
-        if coord[0] == 1 and (0, coord[1]) in values:
-            return False
-        if coord[0] == self.row_nr - 2 and (self.row_nr-1, coord[1]) in values:
-            return False
-        if coord[1] == 1 and (coord[0], 0) in values:
-            return False
-        if coord[1] == self.column_nr-1-size and (coord[0], self.column_nr-size) in values:
-            return False
+        if self.row_nr > 2:
+            if coord[0] == 1 and (0, coord[1]) in values:
+                return False
+            if coord[0] == self.row_nr - 2 and (self.row_nr-1, coord[1]) in values:
+                return False
+        if self.column_nr > 2:
+            if coord[1] == 1 and (coord[0], 0) in values:
+                return False
+            if coord[1] == self.column_nr-1-size and (coord[0], self.column_nr-size) in values:
+                return False
         return True
 
     def get_possible_places_for_all_groups(self, list_of_sizes):
         """Get all the possible places for each group."""
         group_sizes = self.get_all_group_sizes_list(list_of_sizes)  # list of all the group sizes
-        # group_sizes.sort(reverse=True)
+        group_sizes.sort(reverse=True)
         possible_sizes = self.get_placement_possibilities()
         possiblities_groups = {}
-        # print("sizes", possible_sizes)
 
         for g in group_sizes:
             group_places = []
