@@ -1,6 +1,3 @@
-from problem.problem import Offline, Onfline
-import pickle
+from problem.problem import Offline
 
-for i in range(21):
-    name = "Exact" + str(i + 1)
-    Offline(name + ".txt")
+Offline("/Users/clazinasteunenberg/Documents/GitHub/cinema_project/input/offline_thin.txt")
