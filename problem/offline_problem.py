@@ -1,7 +1,7 @@
 """Assignment New-Normal Cinema Seating Planning - Offline made by Anne Lycia Cate, Esmee Dekker, Lucas Meijer,
 Zoril Oláh and Martijn Sturm."""
 
-from pulp import LpMaximize, LpProblem, LpStatus, lpSum, LpVariable, GLPK
+from pulp import LpMaximize, LpProblem, LpStatus, lpSum, LpVariable, GLPK, PULP_CBC_CMD
 from termcolor import colored
 import math
 
@@ -55,13 +55,13 @@ class Problem:
         self.model += lpSum(self.x)
 
         # Solve the problem
-        self.model.solve()
+        self.model.solve(PULP_CBC_CMD(timeLimit=600, msg=False, gapRel=0))
         # solver=GLPK(msg=False)
 
         self.output()
 
     def output(self):
-        """
+
         for var in self.model.variables():
             if var.name[0:1] == 'x':
                 coor = int(var.name[1:])
@@ -93,7 +93,7 @@ class Problem:
                     result[yCoor][xCoor] = 'green'
 
         print('\n'.join([''.join(['{:4}'.format(colored('■ ', item)) for item in row])
-                         for row in result]))
+                         for row in result]))"""
         print('Total: ' + str(self.model.objective.value()))
         for name, constraint in self.model.constraints.items():
             if name[0:5] == 'Group':
