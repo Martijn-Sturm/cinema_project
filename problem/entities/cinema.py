@@ -132,8 +132,10 @@ class Cinema:
 
         # Remove duplicates by making a set, and remove the seats that are input from the set
         result = set(all_eligible_neighboors)
-        for position in positions:
-            result.remove(position)
+        # But only if the group of seats is greater than 1
+        if len(positions) > 1:
+            for position in positions:
+                result.remove(position)
         return result
 
     def get_placement_position_coordinates(self):

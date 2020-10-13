@@ -257,7 +257,7 @@ class MinCovidChairs(OnlineAlgorithm):
                 )
             except Exception as err:
                 if super_possibility.size < self.group_size:
-                    self.logger.error(err)
+                    self.logger.debug(err)
                     continue
                 else:
                     raise
