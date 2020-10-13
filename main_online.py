@@ -1,20 +1,22 @@
 from algorithms.online import FirstFit, BestFit, WorstFit, MinCovidChairs, Hybrid_BF_CC
 from utils.test_file import generate_group_sequence
 
+FILE = "input/online/Online5.txt"
+LOG = "test"
 
-best_fit = BestFit("input/online_input_big1.txt")
-best_fit.execute("bestfit1")
+best_fit = BestFit(FILE)
+best_fit.execute(f"{LOG}/bestfit")
 
-first_fit = FirstFit("input/online_input_big1.txt")
-first_fit.execute("firstfit1")
+first_fit = FirstFit(FILE)
+first_fit.execute(f"{LOG}/firstfit")
 
-worst_fit = WorstFit("input/online_input_big1.txt")
-worst_fit.execute("worstfit1")
+worst_fit = WorstFit(FILE)
+worst_fit.execute(f"{LOG}/worstfit")
 
-min_covid_chairs = MinCovidChairs("input/online_input_big1.txt")
-min_covid_chairs.execute("mincovidchairs1")
+min_covid_chairs = MinCovidChairs(FILE)
+min_covid_chairs.execute(f"{LOG}/mincovidchairs")
 
-hybrid_fit = Hybrid_BF_CC("input/online_input_big1.txt")
-hybrid_fit.execute("hybrid_fit1")
+# hybrid_fit = Hybrid_BF_CC(FILE)
+# hybrid_fit.execute(f"{LOG}/hybrid_fit")
 
-new_groups = generate_group_sequence(50)
+# new_groups = generate_group_sequence(50)
