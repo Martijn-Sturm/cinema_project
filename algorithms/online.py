@@ -211,33 +211,37 @@ class Hybrid_BF_CC(OnlineAlgorithm):
         placement_possibilities = filter_placement_possibilities_on_minimum_size(
             options, self.group_size
         )
-        placements_sizes = sorted(placement_possibilities)
 
-        for placement_size in placements_sizes:
-            # Take all possabilities for a specific size
-            specific_size_placement_possibilities = placement_possibilities[
-                placement_size
-            ]
-            # Use function to find least covid chair placement for the specific size. Output is dict {size : possibilities}
-            specific_size_least_covid_chairs = select_placement_possibilities_of_minimum_covid_chairs(
-                self, specific_size_placement_possibilities
-            )
-            # Select the least amount of covid chair options.
-            # Random to deal with multiple options with the same amount of covid chairs.
-            candidate = random.choice(
-                list(
-                    specific_size_least_covid_chairs[
-                        min(specific_size_least_covid_chairs.keys())
-                    ]
-                )
-            )
-            if placement_size not in candidates:
-                candidates.update({placement_size: [candidate]})
+        if not placement_possibilities:
+            raise NoPlacementFoundError(self.group_size)
+
+        # Select best fitting first bin from possibilities:
+        selected_bin = placement_possibilities[min(placement_possibilities.keys())][0]
+
+        try:
+            sub_possibilities = selected_bin.get_sub_possibilities(self.group_size)
+        except Exception as err:
+            if selected_bin.size < self.group_size:
+                self.logger.debug(err)
+                raise NoPlacementFoundError(self.group_size)
             else:
-                candidates[placement_size].append(candidate)
+                raise
+
+        # Determine for each sub possibility the number of covid chairs that it would result into
+        candidates = {}
+        for possibility in sub_possibilities:
+            covid_chairs = self.get_number_of_covid_seats_for_placement_possibility(
+                possibility
+            )
+            if covid_chairs not in candidates:
+                candidates.update({covid_chairs: [possibility]})
+            else:
+                candidates[covid_chairs].append(possibility)
 
         if not candidates:
             raise NoPlacementFoundError(self.group_size)
+
+        # Return the first candidate from the least covid chairs candidates
         return candidates[min(candidates.keys())][0]
 
 
