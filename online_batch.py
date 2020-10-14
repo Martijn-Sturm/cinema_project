@@ -1,13 +1,14 @@
 from utils.test_file import generate_group_sequence
-from algorithms.online import FirstFit, BestFit, WorstFit, MinCovidChairs, Hybrid_BF_CC
+
+# from algorithms.online import FirstFit, BestFit, WorstFit, MinCovidChairs, Hybrid_BF_CC
 import pandas as pd
 
 # import matplotlib.pyplot as plt
 from os import listdir
 
-FILEPATH = "input/online_input_big1.txt"
-GROUPS_LIST = [generate_group_sequence(50) for i in range(100)]
-FILE_DIR = "input/online"
+# FILEPATH = "input/online_input_big1.txt"
+# GROUPS_LIST = [generate_group_sequence(50) for i in range(100)]
+# FILE_DIR = "input/online"
 
 
 def run_algorithm_with_original_groups(algorithm, filepath):

@@ -205,9 +205,8 @@ class WorstFit(OnlineAlgorithm):
         return candidates[max(candidates.keys())][0]
 
 
-class Hybrid_BF_CC(OnlineAlgorithm):
+class Hybrid(OnlineAlgorithm):
     def choose_candidate(self, options):
-        candidates = {}
         placement_possibilities = filter_placement_possibilities_on_minimum_size(
             options, self.group_size
         )
@@ -245,7 +244,7 @@ class Hybrid_BF_CC(OnlineAlgorithm):
         return candidates[min(candidates.keys())][0]
 
 
-class MinCovidChairs(OnlineAlgorithm):
+class Greedy(OnlineAlgorithm):
     """
     Searches for a spot in the cinema for the group that leads to the list extra seats that are made unavaible due to corona distance.
     """
