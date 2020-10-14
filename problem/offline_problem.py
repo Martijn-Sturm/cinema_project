@@ -55,9 +55,6 @@ class Problem:
         # Solve the problem
         self.model.solve()
         # solver=GLPK(msg=False)
-        self.update_grid()
-        self.update_group_sizes()
-        return self.grid
 
     def update_group_sizes(self):
         size = 0
@@ -65,9 +62,24 @@ class Problem:
             if name[0:5] == 'Group' and name[-5:] != "Large":
                 self.number_of_groups[size] = int(abs(constraint.value()))
                 size += 1
+        return self.grid
 
     def get_taken_seats(self):
         return int(self.model.objective.value())
+
+    def update_grid(self):
+        for var in self.model.variables():
+            if var.name[0:1] == 'x':
+                coor = int(var.name[1:])
+                xCoor = (coor - 1) % self.cols
+                yCoor = math.floor((coor - 1) / self.cols)
+                if self.grid[yCoor][xCoor] == 0:
+                    self.grid[yCoor][xCoor] = "0"
+                    continue
+                if var.value() == 1:
+                    self.grid[yCoor][xCoor] = "x"
+                else:
+                    self.grid[yCoor][xCoor] = "1"
 
     def output(self):
         """
@@ -97,20 +109,6 @@ class Problem:
         for name, constraint in self.model.constraints.items():
             if name[0:5] == 'Group':
                 print(f"{name}: {constraint.value()}")
-
-    def update_grid(self):
-        for var in self.model.variables():
-            if var.name[0:1] == 'x':
-                coor = int(var.name[1:])
-                xCoor = (coor - 1) % self.cols
-                yCoor = math.floor((coor - 1) / self.cols)
-                if self.grid[yCoor][xCoor] == 0:
-                    self.grid[yCoor][xCoor] = "0"
-                    continue
-                if var.value() == 1:
-                    self.grid[yCoor][xCoor] = "x"
-                else:
-                    self.grid[yCoor][xCoor] = "1"
 
     def determine_biggest_sum(self, strings, dicts):
         for i in range(len(strings)):

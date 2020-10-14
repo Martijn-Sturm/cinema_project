@@ -9,6 +9,25 @@ class Offline:
     def __init__(self, filepath) -> None:
         # Read file
         file_input = Input(filepath, "offline")
+        p = Problem(file_input.grid, file_input.groups, file_input.row_nr, file_input.column_nr)
+        # p.print_grid()
+        p.get_solution()
+
+
+class Online:
+    def __init__(self, filepath) -> None:
+        # Read file
+        file_input = Input(filepath, "online")
+
+        # From file input, initialize cinema and groups object
+        self.cinema = Cinema(file_input.grid, file_input.row_nr, file_input.column_nr)
+        self.groups = OnlineGroups(file_input.groups)
+
+
+class BalconyProblem:
+    def __init__(self, filepath) -> None:
+        # Read file
+        file_input = Input(filepath, "offline")
         self.rows = file_input.row_nr
         self.cols = file_input.column_nr
         self.grid = file_input.grid
@@ -48,12 +67,17 @@ class Offline:
             print(row)
 
     def get_best_balcony(self, balcony, sizes):
+        print("hoi")
         best_score = 0
         sol_balcony = None
         for i in balcony:
-            grid_copy = [x[:] for x in self.grid]
-            p = Problem(grid_copy[i.begin:i.end], sizes.copy(), i.end - i.begin, self.cols)
-            grid = p.get_solution()
+            grid_copy = [x[:] for x in self.grid[i.begin:i.end]]
+            for j in grid_copy:
+                print("grid", j)
+            p = Problem(grid_copy, sizes.copy(), i.end - i.begin, self.cols)
+            p.get_solution()
+            p.update_grid()
+            grid = p.update_group_sizes()
             i.seats_taken = p.get_taken_seats()
             if i.seats_taken > best_score:
                 i.sizes = p.number_of_groups
@@ -63,6 +87,8 @@ class Offline:
         self.update_grid(sol_balcony)
         self.remove_balcony(balcony, sol_balcony.begin)
         self.taken += best_score
+        for b in balcony:
+            print("balconyhier", b.begin, b.end, sol_balcony.sizes)
         self.find_best_balcony(balcony, sol_balcony.sizes)
 
     @staticmethod
@@ -80,15 +106,19 @@ class Offline:
 
     def find_best_balcony(self, balcony, sizes):
         if len(balcony) == 1:
+            print("one left")
             i = balcony[0]
             p = Problem(self.grid[i.begin:i.end], sizes, i.end - i.begin, self.cols)
-            grid = p.get_solution()
+            p.get_solution()
+            p.update_grid()
+            grid = p.update_group_sizes()
             i.grid = grid
             self.update_grid(i)
             self.output()
             p.output()
             self.taken += p.get_taken_seats()
         else:
+            print("more left")
             self.get_best_balcony(balcony, sizes)
 
     def get_balconies(self):
@@ -126,13 +156,3 @@ class Balcony:
         self.seats_taken = None
         self.sizes = None
         self.grid = None
-
-
-class Online:
-    def __init__(self, filepath) -> None:
-        # Read file
-        file_input = Input(filepath, "online")
-
-        # From file input, initialize cinema and groups object
-        self.cinema = Cinema(file_input.grid, file_input.row_nr, file_input.column_nr)
-        self.groups = OnlineGroups(file_input.groups)
