@@ -12,6 +12,8 @@ class Offline:
         p = Problem(file_input.grid, file_input.groups, file_input.row_nr, file_input.column_nr, file_input.vips)
         # p.print_grid()
         p.get_solution()
+        p.output()
+
 
 class Onfline:
     def __init__(self, filepath) -> None:
@@ -20,9 +22,11 @@ class Onfline:
         p = Problem(file_input.grid, file_input.groups, file_input.row_nr, file_input.column_nr, file_input.vips)
         # p.print_grid()
         p.get_solution()
+        p.output()
         self.result = p.model.objective.value()
     def __result__():
         return self.result
+
 
 class Online:
     def __init__(self, filepath) -> None:
@@ -42,18 +46,13 @@ class BalconyProblem:
         self.cols = file_input.column_nr
         self.grid = file_input.grid
         self.groups = file_input.groups
+        self.vips = file_input.vips
 
         start = datetime.now()
 
         self.taken = 0
         self.check_for_balconies()
-        """
-        p = Problem(self.grid, self.groups, self.rows, self.cols)
-        grid = p.get_solution()
-        self.output(grid, self.rows, self.cols)
-        self.taken = p.get_taken_seats()
-        p.output()
-        """
+
         print()
         print("Taken", self.taken)
         print("Time:", datetime.now() - start)
@@ -61,11 +60,11 @@ class BalconyProblem:
     def check_for_balconies(self):
         balcony = self.get_balconies()
         if len(balcony) == 0:
-            p = Problem(self.grid, self.groups, self.rows, self.cols)
+            p = Problem(self.grid, self.groups, self.rows, self.cols, self.vips)
             p.get_solution()
             self.output()
             self.taken = p.get_taken_seats()
-            p.output()
+
         else:
             self.get_best_balcony(balcony, self.groups)
 
@@ -77,14 +76,11 @@ class BalconyProblem:
             print(row)
 
     def get_best_balcony(self, balcony, sizes):
-        print("hoi")
         best_score = 0
         sol_balcony = None
         for i in balcony:
             grid_copy = [x[:] for x in self.grid[i.begin:i.end]]
-            for j in grid_copy:
-                print("grid", j)
-            p = Problem(grid_copy, sizes.copy(), i.end - i.begin, self.cols)
+            p = Problem(grid_copy, sizes.copy(), i.end - i.begin, self.cols, self.vips)
             p.get_solution()
             p.update_grid()
             grid = p.update_group_sizes()
@@ -97,8 +93,6 @@ class BalconyProblem:
         self.update_grid(sol_balcony)
         self.remove_balcony(balcony, sol_balcony.begin)
         self.taken += best_score
-        for b in balcony:
-            print("balconyhier", b.begin, b.end, sol_balcony.sizes)
         self.find_best_balcony(balcony, sol_balcony.sizes)
 
     @staticmethod
@@ -116,19 +110,16 @@ class BalconyProblem:
 
     def find_best_balcony(self, balcony, sizes):
         if len(balcony) == 1:
-            print("one left")
             i = balcony[0]
-            p = Problem(self.grid[i.begin:i.end], sizes, i.end - i.begin, self.cols)
+            p = Problem(self.grid[i.begin:i.end], sizes, i.end - i.begin, self.cols, self.vips)
             p.get_solution()
             p.update_grid()
             grid = p.update_group_sizes()
             i.grid = grid
             self.update_grid(i)
             self.output()
-            p.output()
             self.taken += p.get_taken_seats()
         else:
-            print("more left")
             self.get_best_balcony(balcony, sizes)
 
     def get_balconies(self):

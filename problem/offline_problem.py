@@ -57,9 +57,6 @@ class Problem:
         # Solve the problem
         self.model.solve(PULP_CBC_CMD(timeLimit=600, msg=False, gapRel=0))
         # solver=GLPK(msg=False)
-
-        self.output()
-
     def update_group_sizes(self):
         size = 0
         for name, constraint in self.model.constraints.items():
@@ -119,10 +116,12 @@ class Problem:
 
         print('\n'.join([''.join(['{:4}'.format(colored('■ ', item)) for item in row])
                          for row in result]))"""
+        """
         print('Total: ' + str(self.model.objective.value()))
         for name, constraint in self.model.constraints.items():
             if name[0:5] == 'Group':
                 print(f"{name}: {constraint.value()}")
+        """
 
     def determine_biggest_sum(self, strings, dicts):
         for i in range(len(strings)):
