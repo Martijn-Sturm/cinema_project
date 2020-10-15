@@ -10,7 +10,6 @@ class Offline:
         # Read file
         file_input = Input(filepath, "offline")
         p = Problem(file_input.grid, file_input.groups, file_input.row_nr, file_input.column_nr, file_input.vips)
-        # p.print_grid()
         p.get_solution()
         p.output()
 
@@ -20,7 +19,6 @@ class Onfline:
         # Read file
         file_input = Input(filepath, "onfline")
         p = Problem(file_input.grid, file_input.groups, file_input.row_nr, file_input.column_nr, file_input.vips)
-        # p.print_grid()
         p.get_solution()
         p.output()
         self.result = p.model.objective.value()
@@ -83,7 +81,8 @@ class BalconyProblem:
             p = Problem(grid_copy, sizes.copy(), i.end - i.begin, self.cols, self.vips)
             p.get_solution()
             p.update_grid()
-            grid = p.update_group_sizes()
+            p.update_group_sizes()
+            grid = p.grid
             i.seats_taken = p.get_taken_seats()
             if i.seats_taken > best_score:
                 i.sizes = p.number_of_groups
@@ -114,7 +113,8 @@ class BalconyProblem:
             p = Problem(self.grid[i.begin:i.end], sizes, i.end - i.begin, self.cols, self.vips)
             p.get_solution()
             p.update_grid()
-            grid = p.update_group_sizes()
+            p.update_group_sizes()
+            grid = p.grid
             i.grid = grid
             self.update_grid(i)
             self.output()

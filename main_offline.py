@@ -1,4 +1,4 @@
 from problem.problem import Offline
 
 
-Offline("input\\Exact14.txt")
+Offline("input\\test_input.txt")
