@@ -43,7 +43,6 @@ class Problem:
         :param s: Number of the group size
         :param size_string: Name of the group size
         :return: Dictionary with as key the position in the grid and as value a LpVariable
-
         """
         return {i: LpVariable(name=f"{size_string}{i}", lowBound=0, cat="Binary") for i in
                 range(1, self.rows * self.cols - s * self.rows + 1)}
