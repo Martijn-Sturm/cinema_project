@@ -62,7 +62,7 @@ class Problem:
         self.model += lpSum(self.x)
 
         # Solve the problem
-        self.model.solve(PULP_CBC_CMD(timeLimit=600, msg=True, gapRel=0))
+        self.model.solve(PULP_CBC_CMD(timeLimit=600, msg=False, gapRel=0))
 
     def update_model_with_decision_variables(self):
         """
