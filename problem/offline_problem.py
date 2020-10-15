@@ -1,6 +1,3 @@
-"""Assignment New-Normal Cinema Seating Planning - Offline made by Anne Lycia Cate, Esmee Dekker, Lucas Meijer,
-Zoril Oláh and Martijn Sturm."""
-
 from pulp import LpMaximize, LpProblem, lpSum, LpVariable, PULP_CBC_CMD
 from termcolor import colored
 import math
