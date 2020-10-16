@@ -26,7 +26,7 @@ To test the program on a different input file simply change the name of the inpu
 
 ### Online
 
-To run the algorithms for the Online problem run the following statement in CMD.
+To run the algorithms for the Online problem first remove the comments of the algorithm you like to test in the file main_online.py. Then run the following statement in CMD.
 
 ```bash
 python main_online.py
