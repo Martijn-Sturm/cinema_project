@@ -1,3 +1,5 @@
 tabulate
 networkx
 pulp
+joblib
+pandas
