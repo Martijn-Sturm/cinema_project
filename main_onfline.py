@@ -1,6 +1,7 @@
 from problem.problem import Offline, Onfline
 import pickle
 
+# Loops over the first 7 online files, performs offline analysis on them
 dict = {}
 for i in range(7):
     name = "Online" + str(i + 1)
