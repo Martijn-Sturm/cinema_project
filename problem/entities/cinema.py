@@ -92,6 +92,14 @@ class Cinema:
         return [position for position in position_container]
 
     def get_eligible_neighboors_from_position(self, position):
+        """Gathers all neighboors that are still eligible (so not occupied or unavailable) from input position
+
+        Args:
+            position (Position)
+
+        Returns:
+            list(position)
+        """
         all_neighboors = self.get_neighboors_from_position(position)
 
         eligible_positions = []

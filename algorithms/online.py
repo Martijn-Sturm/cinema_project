@@ -23,6 +23,12 @@ class NoPlacementFoundError(Exception):
 
 
 class OnlineAlgorithm(abc.ABC):
+    """
+    Base class for the variants of the online algorithms. It containts all the shared functionality used by each algorithm, and defines the interface.
+    ...
+
+    """
+
     NO_PLACE_INDICATION = "0 0"
 
     def __init__(self, filepath) -> None:
@@ -30,6 +36,8 @@ class OnlineAlgorithm(abc.ABC):
         self._init_state()
 
     def _init_state(self):
+        """Initiates the state of the online algorithm object. It sets the cinema and group attributes based on the filepath given during instantiation.
+        """
         problem = Online(self.filepath)
         self.cinema = problem.cinema
         self.groups = problem.groups
@@ -45,11 +53,24 @@ class OnlineAlgorithm(abc.ABC):
     #     self._init_state()
 
     def set_new_groups(self, group_list: list):
+        """Overrides the groups from the grid text file. Can be used to run the algorithm on user defined group sequence.
+
+        Args:
+            group_list (list[int]): A list of integers, left to right denotes the sequence in which they should be placed.
+        """
         from collections import deque
 
         self.groups = OnlineGroups(group_list)
 
     def get_next_group(self):
+        """Queries the next group to be placed in the cinema. Should only be used after previous placement is finished, to avoid cheating.
+
+        Raises:
+            NoGroupsLeftError: If there are no groups to be placed anymore, in the self.groups queue, this error is raised.
+
+        Returns:
+            int: The size of the group
+        """
         try:
             group_size = self.groups.get_next_group()
             self.logger.info(f"Group size to be placed: {group_size}")
@@ -67,6 +88,15 @@ class OnlineAlgorithm(abc.ABC):
         return n_free_seats
 
     def get_placement_possibilities(self):
+        """Gathers all the bins where groups can still be placed
+
+        Returns:
+            list(
+                dict(
+                    bin_size: list(PlacementPossibility)
+                    )
+                ): Returns a list containing dictionaries with as keys the bin size, and as values a list with all the placement possibilities with that specific bin size.
+        """
         self.logger.info(self.cinema)
 
         options = self.cinema.get_placement_possibilities()
@@ -75,9 +105,19 @@ class OnlineAlgorithm(abc.ABC):
 
     @abstractmethod
     def choose_candidate(self) -> PlacementPossibility:
+        """Chooses which placement possibility is used to place the current group. Must be implemented in each algorithm variant specifically.
+
+        Returns:
+            PlacementPossibility
+        """
         pass
 
     def place_candidate(self, placement):
+        """Places the current group at the given placementpossibility
+
+        Args:
+            placement (PlacementPossibility)
+        """
         self.cinema.place_group(
             placement.coordinates, self.group_size, str(self.counter)
         )
@@ -105,6 +145,15 @@ class OnlineAlgorithm(abc.ABC):
         logger.info(f"{remaining} number of remaining free seats")
 
     def execute(self, logging_folder=None, log_grid=True):
+        """Runs the algorithm
+
+        Args:
+            logging_folder (str, optional): Determines where the logs are stored in the log folder. If kept as 'None', no logs will be made. Defaults to None.
+            log_grid (bool, optional): Determines if the grid prints will be saved in the logs. Defaults to True.
+
+        Returns:
+            Cinema
+        """
         if logging_folder:
             print("Logs will be saved in:", logging_folder)
         self.counter = 0
@@ -163,6 +212,8 @@ class OnlineAlgorithm(abc.ABC):
 
 
 class BestFit(OnlineAlgorithm):
+    """Searches for the smallest bins that fits the group size. If multiple bins are present, the first found (left top in grid) is used"""
+
     def choose_candidate(self, options):
 
         candidates = filter_placement_possibilities_on_minimum_size(
@@ -179,6 +230,8 @@ class BestFit(OnlineAlgorithm):
 
 
 class FirstFit(OnlineAlgorithm):
+    """Will use the first bin size that the group fits in, starting from left top corner of cinema"""
+
     def choose_candidate(self, options):
 
         found_placement = False
@@ -191,6 +244,8 @@ class FirstFit(OnlineAlgorithm):
 
 
 class WorstFit(OnlineAlgorithm):
+    """Opposite of BestFit. It will use the largest bin size"""
+
     def choose_candidate(self, options):
 
         candidates = filter_placement_possibilities_on_minimum_size(
@@ -206,6 +261,10 @@ class WorstFit(OnlineAlgorithm):
 
 
 class Hybrid(OnlineAlgorithm):
+    """
+    A merge between the BestFit algorithm and the Greedy algorithm. Will perform BestFit first for each group. Then, it uses Greedy as tiebreaker for the best possibilities that BestFit found.
+    """
+
     def choose_candidate(self, options):
         placement_possibilities = filter_placement_possibilities_on_minimum_size(
             options, self.group_size
@@ -282,35 +341,6 @@ class Greedy(OnlineAlgorithm):
 
         # Return the first candidate from the least covid chairs candidates
         return candidates[min(candidates.keys())][0]
-
-
-def select_placement_possibilities_of_minimum_covid_chairs(self, options):
-    candidates = {}
-    size = self.group_size
-    for option in options:
-        coordinates = option[1]
-        positions = []
-        for n in range(size):
-            row = int(coordinates[0])
-            column = int(coordinates[1]) + n
-            positions.append(self.cinema.get_position((row, column)))
-        covid_chairs = []
-        for position in positions:
-            covid_chairs = (
-                covid_chairs
-                + self.cinema.get_eligible_neighboors_from_position(position)
-            )
-        covid_chairs = set(covid_chairs)
-        if self.group_size > 1:
-            number_covid_chairs = len(covid_chairs) - int(self.group_size)
-        else:
-            number_covid_chairs = len(covid_chairs)
-        candidates
-        if number_covid_chairs not in candidates:
-            candidates.update({number_covid_chairs: [option]})
-        else:
-            candidates[number_covid_chairs].append(option)
-    return candidates
 
 
 def filter_placement_possibilities_on_minimum_size(options, minimum_size: int):
