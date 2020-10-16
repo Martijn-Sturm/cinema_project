@@ -1,15 +1,35 @@
-from problem.problem import Online
+from algorithms.online import FirstFit, BestFit, WorstFit, Hybrid, Greedy
 
-problem = Online("input/online_challengingInput.txt")
-print(problem.cinema)
+FILE = "input/online/Online5.txt"
+LOG = "online5"
 
-# problem.cinema.place_group((1, 0), 2, "group_id_test")
-# print(problem.cinema)
+# best_fit = BestFit(FILE)
+# best_fit.execute(
+#     f"{LOG}/bestfit",
+#     #
+# )
 
-# neighboors_01 = problem.cinema.get_neighboors_from_coordinates((0, 1))
+# first_fit = FirstFit(FILE)
+# first_fit.execute(
+#     f"{LOG}/firstfit",
+#     #
+# )
 
-# print("\nNeighboors from (0,1)", neighboors_01)
+# worst_fit = WorstFit(FILE)
+# worst_fit.execute(
+#     f"{LOG}/worstfit",
+#     #
+# )
 
-# print("\nSame with coordinates:")
-# for neighb in neighboors_01:
-#     print(neighb, neighb.get_coordinates())
+# min_covid_chairs = Greedy(FILE)
+# min_covid_chairs.execute(
+#     f"{LOG}/greedy",
+#     #
+# )
+
+# hybrid_fit = Hybrid(FILE)
+# hybrid_fit.execute(
+#     f"{LOG}/hybrid",
+#     #
+# )
+

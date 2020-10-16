@@ -4,6 +4,12 @@ import sys
 import threading
 
 
+def dummy_logger():
+    logger = logging.getLogger("dummy")
+    logger.addHandler(logging.NullHandler())
+    return logger
+
+
 def get_logger(filename, name=__name__, subfolder=None):
     try:
         name = filename

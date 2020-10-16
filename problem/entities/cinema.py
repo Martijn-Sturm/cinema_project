@@ -1,3 +1,4 @@
+from typing import NamedTuple, Tuple
 from tabulate import tabulate
 from .utils import get_neighboors_from_grid, create_cinema_graph
 from .positions import Seat, Spacer
@@ -91,6 +92,14 @@ class Cinema:
         return [position for position in position_container]
 
     def get_eligible_neighboors_from_position(self, position):
+        """Gathers all neighboors that are still eligible (so not occupied or unavailable) from input position
+
+        Args:
+            position (Position)
+
+        Returns:
+            list(position)
+        """
         all_neighboors = self.get_neighboors_from_position(position)
 
         eligible_positions = []
@@ -106,6 +115,36 @@ class Cinema:
                 eligible_positions.append(position)
 
         return eligible_positions
+
+    def get_eligible_neighboors_from_group_of_coordinates(
+        self, coordinates_list: list
+    ) -> list:
+        """Gather all neighboors that are within corona distance of the given list of coordinates
+
+        Args:
+            coordinates_list (list(tuple(row_nr, column_nr))): List with coordinates for the positions that neighboors need to be collected for.
+
+        Returns:
+            list(position): a list with positions of the eligible neighboors
+        """
+        positions = tuple(
+            [self.get_position(coordinates) for coordinates in coordinates_list]
+        )
+
+        all_eligible_neighboors = []
+        for position in positions:
+            all_eligible_neighboors = (
+                all_eligible_neighboors
+                + self.get_eligible_neighboors_from_position(position)
+            )
+
+        # Remove duplicates by making a set, and remove the seats that are input from the set
+        result = set(all_eligible_neighboors)
+        # But only if the group of seats is greater than 1
+        if len(positions) > 1:
+            for position in positions:
+                result.remove(position)
+        return result
 
     def get_placement_position_coordinates(self):
         """Generates a list with tuples containing the coordinates of still eligible seats
@@ -127,11 +166,25 @@ class Cinema:
                         raise
         return eligible_coordinates
 
+    def get_occupied_seats(self):
+        occupied_seats = []
+        for row in self.seating_grid:
+            for position in row:
+                try:
+                    if position.taken:
+                        occupied_seats.append(position)
+                except AttributeError:
+                    if isinstance(position, Spacer):
+                        pass
+                    else:
+                        raise
+        return occupied_seats
+
     def get_placement_possibilities(self):
         """Returns a list with dictionaries in which as keys the max group size that can be placed for that item, and as value the position coordinates of the lefter seat of that item.
 
         Returns:
-            list(dict): dict(number_of_uninterrupted_seats: position_most_lefter_seat(row, column))
+            list(PlacementPossibility): 
         """
         coord_list = self.get_placement_position_coordinates()
 
@@ -228,5 +281,57 @@ class Cinema:
                     raise
 
 
-PlacementPossibility = namedtuple("PlacementPossibility", ["size", "coordinates"])
+class PlacementPossibility(NamedTuple):
+    """
+    Object that resembles the possibility of group placement
+    ...
+    
+    Attributes
+    ----------
+    size : tuple(row, column)
+        Tuple with at [0] the row number index (starting from 0), and at [1] the column number index (starting from 1)
+    
+    Methods
+    -------
+    get_sub_possibilities(group_size: int):
+        Returns a list with the sub placement possibilities from which the object consists, given a size indicated by 'group_size'.
+    """
+
+    size: int
+    coordinates: tuple
+
+    def get_sub_possibilities(self, group_size: int) -> list:
+        """Generates and returns all sub PlacementPossibilities from this super PlacementPossbilities, given the minimum size those possibilities must be
+
+        Args:
+            group_size (int): Minimum size of all subs
+
+        Raises:
+            Exception: Is raised when the desired size is smaller that the super PlacementPossibility
+
+        Returns:
+            list(PlacementPossbility): With all the same size, but different coordinates
+        """
+        if group_size > self.size:
+            raise Exception(
+                "No sub possibilities possible for this group size:",
+                group_size,
+                "Since size of this object is:",
+                self.size,
+            )
+        sub_possibilities = []
+        for i in range(self.size - (group_size - 1)):
+            coordinates = (self.coordinates[0], self.coordinates[1] + i)
+            sub_possibilities.append(PlacementPossibility(group_size, coordinates))
+        return sub_possibilities
+
+    def get_list_of_seat_coordinates(self):
+        """Generates a list of tuples which denote the coordinates of the seats that are covered by this PlacementPossbility
+
+        Returns:
+            list((row, column)): Tuple with [0]= row number and [1] is column number
+        """
+        return [
+            (self.coordinates[0], self.coordinates[1] + col) for col in range(self.size)
+        ]
 

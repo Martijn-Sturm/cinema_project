@@ -13,7 +13,13 @@ class Offline:
         :param filepath: File name
         """
         file_input = Input(filepath, "offline")
-        p = Problem(file_input.grid, file_input.groups, file_input.row_nr, file_input.column_nr, file_input.vips)
+        p = Problem(
+            file_input.grid,
+            file_input.groups,
+            file_input.row_nr,
+            file_input.column_nr,
+            file_input.vips,
+        )
         p.get_solution()
         p.output()
 
@@ -26,10 +32,17 @@ class Onfline:
         :param filepath: File name
         """
         file_input = Input(filepath, "onfline")
-        p = Problem(file_input.grid, file_input.groups, file_input.row_nr, file_input.column_nr, file_input.vips)
+        p = Problem(
+            file_input.grid,
+            file_input.groups,
+            file_input.row_nr,
+            file_input.column_nr,
+            file_input.vips,
+        )
         p.get_solution()
         p.output()
         self.result = p.model.objective.value()
+
     def __result__():
         return self.result
 
@@ -40,8 +53,13 @@ class Online:
         file_input = Input(filepath, "online")
 
         # From file input, initialize cinema and groups object
-        self.cinema = Cinema(file_input.grid, file_input.row_nr, file_input.column_nr)
-        self.groups = OnlineGroups(file_input.groups)
+        try:
+            self.cinema = Cinema(
+                file_input.grid, file_input.row_nr, file_input.column_nr
+            )
+            self.groups = OnlineGroups(file_input.groups)
+        except Exception as err:
+            raise type(err)(str(err), "filepath:", str(filepath))
 
 
 class BalconyProblem:
@@ -97,7 +115,7 @@ class BalconyProblem:
             while True:
                 if self.grid[r][c] != 0:
                     break
-                if self.cols-1 == c:
+                if self.cols - 1 == c:
                     if r != self.rows - 1:
                         if r != 0:
                             if begin != r:
@@ -125,7 +143,7 @@ class BalconyProblem:
         best_score = 0
         sol_balcony = None
         for i in balcony:
-            grid_copy = [x[:] for x in self.grid[i.begin:i.end]]
+            grid_copy = [x[:] for x in self.grid[i.begin : i.end]]
             p = Problem(grid_copy, sizes.copy(), i.end - i.begin, self.cols, self.vips)
             p.get_solution()
             p.update_grid()
@@ -176,7 +194,9 @@ class BalconyProblem:
         """
         if len(balcony) == 1:
             i = balcony[0]
-            p = Problem(self.grid[i.begin:i.end], sizes, i.end - i.begin, self.cols, self.vips)
+            p = Problem(
+                self.grid[i.begin : i.end], sizes, i.end - i.begin, self.cols, self.vips
+            )
             p.get_solution()
             p.update_grid()
             p.update_group_sizes()
